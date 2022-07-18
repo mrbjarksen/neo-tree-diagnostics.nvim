@@ -2,8 +2,7 @@
 
 local vim = vim
 local cc = require("neo-tree.sources.common.commands")
-local diagnostics = require("diagnostics")
--- local Preview = require("diagnostics.lib.preview")
+local diagnostics = require("neo-tree.sources.diagnostics")
 local utils = require("neo-tree.utils")
 local renderer = require("neo-tree.ui.renderer")
 local manager = require("neo-tree.sources.manager")

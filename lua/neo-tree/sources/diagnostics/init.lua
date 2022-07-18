@@ -6,7 +6,7 @@ local utils = require("neo-tree.utils")
 local renderer = require("neo-tree.ui.renderer")
 local manager = require("neo-tree.sources.manager")
 local events = require("neo-tree.events")
-local items = require("diagnostics.lib.items")
+local items = require("neo-tree.sources.diagnostics.lib.items")
 
 local M = { name = "diagnostics" }
 
