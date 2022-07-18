@@ -135,7 +135,7 @@ function Preview:highlight()
     vim.api.nvim_buf_add_highlight(
       self.bufnr,
       neo_tree_preview,
-      highlights.PREVIEW,
+      highlights.PREVIEW or "Search",
       line,
       col_start,
       col_end
