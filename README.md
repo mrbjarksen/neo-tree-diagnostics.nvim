@@ -12,7 +12,7 @@ The following uses [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
 use {
   "mrbjarksen/neo-tree-diagnostics.nvim",
-  requires = { "nvim-neo-tree/neo-tree.nvim", branch = "main" },
+  requires = "nvim-neo-tree/neo-tree.nvim",
   module = "neo-tree.sources.diagnostics", -- if wanting to lazyload
 }
 ```
