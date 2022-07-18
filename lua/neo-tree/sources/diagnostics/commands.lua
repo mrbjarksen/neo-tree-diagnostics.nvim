@@ -3,6 +3,7 @@
 local vim = vim
 local cc = require("neo-tree.sources.common.commands")
 local diagnostics = require("neo-tree.sources.diagnostics")
+local Preview = require("neo-tree.sources.diagnostics.lib.preview")
 local utils = require("neo-tree.utils")
 local renderer = require("neo-tree.ui.renderer")
 local manager = require("neo-tree.sources.manager")
@@ -114,6 +115,9 @@ local open_with_cmd = function(state, open_cmd, toggle_directory, open_file)
   end
 
   local function open()
+    if state.preview and state.preview.active then
+      state.preview:revert()
+    end
     local path = node.path
     if type(open_file) == "function" then
       open_file(state, path, open_cmd)
@@ -173,6 +177,36 @@ end
 ---open/closed
 M.open_tabnew = function(state, toggle_directory)
   open_with_cmd(state, "tabnew", toggle_directory)
+end
+
+M.preview = function(state)
+  local node = state.tree:get_node()
+  if node.type ~= "diagnostic" or state.current_position == "current" then
+    return
+  end
+
+  local diag = node.extra.diag_struct
+  if not state.preview then
+    state.preview = Preview:new(state)
+  else
+    state.preview:findWindow(state)
+  end
+
+  local start_loc = { diag.lnum, diag.col }
+  local end_loc
+  if diag.end_lnum and diag.end_col then
+    end_loc = { diag.end_lnum, diag.end_col }
+  elseif diag.end_lnum then
+    end_loc = { diag.end_lnum, -1 }
+  elseif diag.end_col then
+    end_loc = { diag.lnum, diag.end_col }
+  end
+
+  state.preview:preview(diag.bufnr, start_loc, end_loc)
+end
+
+M.revert_preview = function(state)
+  state.preview:revert()
 end
 
 M.refresh = refresh
