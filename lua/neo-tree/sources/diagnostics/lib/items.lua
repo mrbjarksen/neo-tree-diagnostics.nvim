@@ -152,6 +152,9 @@ M.get_diagnostics = function(state)
   for id, _ in pairs(context.folders) do
     table.insert(state.default_expanded_nodes, id)
   end
+  if state.position and state.position.node_id then
+    table.insert(state.default_expanded_nodes, state.position.node_id)
+  end
 
   file_items.deep_sort(root.children)
   renderer.show_nodes(root_nodes, state)

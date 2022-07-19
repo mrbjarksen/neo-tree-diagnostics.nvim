@@ -19,16 +19,10 @@ local get_state = function()
 end
 
 local follow_internal = function()
-  if vim.bo.filetype == "neo-tree-popup" then
+  if vim.bo.filetype == "neo-tree" or vim.bo.filetype == "neo-tree-popup" then
     return
   end
-  local path_to_reveal
-  if vim.bo.filetype == "neo-tree" then
-    local last_file = vim.fn.bufname("#")
-    path_to_reveal = vim.fn.fnamemodify(last_file, ":p")
-  else
-    path_to_reveal = manager.get_path_to_reveal()
-  end
+  local path_to_reveal = manager.get_path_to_reveal()
 
   local state = get_state()
   if state.current_position == "float" then
@@ -100,7 +94,7 @@ end
 
 ---Navigate to the given path.
 ---@param path string Path to navigate to. If empty, will navigate to the cwd.
-M.navigate = function(state, path)
+M.navigate = function(state, path, path_to_reveal)
   state.dirty = false
   local path_changed = false
   if path == nil then
@@ -109,6 +103,9 @@ M.navigate = function(state, path)
   if path ~= state.path then
     state.path = path
     path_changed = true
+  end
+  if path_to_reveal then
+    renderer.position.set(state, path_to_reveal)
   end
 
   items.get_diagnostics(state)
