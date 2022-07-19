@@ -47,3 +47,12 @@ require("neo-tree").setup({
   },
 })
 ```
+
+## Usage
+
+The recommended command to use is the following:
+
+```
+:Neotree diagnostic reveal bottom
+```
+
