@@ -53,6 +53,6 @@ require("neo-tree").setup({
 The recommended command to use is the following:
 
 ```
-:Neotree diagnostic reveal bottom
+:Neotree diagnostics reveal bottom
 ```
 
