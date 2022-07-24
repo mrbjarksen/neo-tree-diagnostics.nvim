@@ -48,6 +48,8 @@ require("neo-tree").setup({
 })
 ```
 
+For information on customizing components and renderers, see the [wiki](https://github.com/mrbjarksen/neo-tree-diagnostics.nvim/wiki/Components-and-renderers).
+
 ## Usage
 
 The recommended command to use is the following:
