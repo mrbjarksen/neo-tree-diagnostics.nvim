@@ -208,7 +208,7 @@ M.bufnr = function(config, node, state)
   end
 
   local left = config.left or "#"
-  local right = config.right or {}
+  local right = config.right or ""
 
   local min_width = config.min_width or 0
   bufnr = string.format("%" .. min_width .. "d", bufnr)
@@ -219,7 +219,7 @@ end
 M.lnum = function(config, node, state)
   local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
   local lnum = tostring(node.extra.diag_struct.lnum + 1)
-  local left, right = config.left or {}, config.right or {}
+  local left, right = config.left or "", config.right or ""
 
   local min_width = config.min_width or 0
   lnum = string.format("%" .. min_width .. "d", lnum)
@@ -246,7 +246,7 @@ end
 M.col = function(config, node, state)
   local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
   local col = tostring(node.extra.diag_struct.col + 1)
-  local left, right = config.left or {}, config.right or {}
+  local left, right = config.left or "", config.right or ""
 
   local min_width = config.min_width or 0
   col = string.format("%" .. min_width .. "d", col)
@@ -257,7 +257,7 @@ end
 M.end_col = function(config, node, state)
   local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
   local end_col = node.extra.diag_struct.end_col
-  local left, right = config.left or {}, config.right or {}
+  local left, right = config.left or "", config.right or ""
   if not end_col then
     return {}
   else
@@ -273,18 +273,18 @@ end
 M.severity = function(config, node, state)
   local highlight = config.highlight or highlights.MESSAGE
   local severity = node.extra.diag_struct.severity
-  local left, right = config.left or {}, config.right or {}
+  local left, right = config.left or "", config.right or ""
   if not severity then
     return {}
   end
-  
+
   return create_component({ left, tostring(severity), right }, highlight)
 end
 
 M.message = function(config, node, state)
-  local highlight = config.highlight or highlights.FILE_NAME_OPENED
+  local highlight = config.highlight or highlights.NORMAL
   local message = node.extra.diag_struct.message
-  local left = config.left or {}
+  local left = config.left or ""
   local right = config.right or " "
 
   return create_component({ left, message, right }, highlight)
@@ -293,7 +293,7 @@ end
 M.source = function(config, node, state)
   local highlight = config.highlight or highlights.DIAG_SOURCE or "Comment"
   local source = node.extra.diag_struct.source
-  local left = config.left or {}
+  local left = config.left or ""
   local right = config.right or " "
   if not source then
     return {}
@@ -306,7 +306,7 @@ M.code = function(config, node, state)
   local highlight = config.highlight or highlights.DIAG_CODE or "Comment"
   local code = node.extra.diag_struct.code
   local left = config.left or "("
-  local right = config.left or ") "
+  local right = config.right or ") "
 
   if not code then
     return {}
