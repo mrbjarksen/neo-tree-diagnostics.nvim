@@ -180,7 +180,7 @@ M.default_config = {
     diagnostic = {
       { "indent" },
       { "icon" },
-      { "name" },
+      { "message" },
       { "source" },
       { "code" },
       { "position" },

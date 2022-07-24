@@ -18,6 +18,38 @@ local spaces = function(n)
   return string.rep(" ", n)
 end
 
+local create_component = function(parts, default_highlight)
+  local component = {}
+  for _, part in pairs(parts) do
+    if type(part) == "string" and part ~= "" then
+      part = {
+        text = part,
+        highlight = default_highlight
+      }
+    elseif type(part) == "table" and utils.truthy(part.text) then
+      part = {
+        text = part.text,
+        highlight = part.highlight or default_highlight
+      }
+    end
+
+    if type(part) == "table" and part.text and part.highlight then
+      local last = component[#component]
+      if last and part.highlight == last.highlight then
+        last.text = last.text .. part.text
+      else
+        component[#component+1] = part
+      end
+    end
+  end
+
+  if #component == 1 then
+    return component[1]
+  else
+    return component
+  end
+end
+
 local diag_severity_to_string = function(severity)
   if severity == vim.diagnostic.severity.ERROR then
     return "Error"
@@ -32,12 +64,10 @@ local diag_severity_to_string = function(severity)
   end
 end
 
-local get_diag_icon = function(severity, right_padding)
+local get_diag_icon = function(severity)
   if severity == nil then
     return {}
   end
-
-  right_padding = right_padding or 1
 
   local defined = vim.fn.sign_getdefined("DiagnosticSign" .. severity)
   if #defined == 0 then
@@ -51,10 +81,10 @@ local get_diag_icon = function(severity, right_padding)
     defined = vim.fn.sign_getdefined("LspDiagnosticsSign" .. old_severity)
   end
   defined = defined and defined[1] or {}
-  defined.text = defined.text and defined.text:gsub("%s+$", spaces(right_padding))
+  defined.text = defined.text and defined.text:gsub("%s*$", "")
 
   local fallback = {
-    text = severity:sub(1, 1) .. spaces(right_padding),
+    text = severity:sub(1, 1),
     highlight = "DiagnosticSign" .. severity,
   }
 
@@ -65,19 +95,6 @@ local get_diag_icon = function(severity, right_padding)
 end
 
 local M = {}
-
-M.code = function(config, node, state)
-  local highlight = config.highlight or highlights.DIAG_CODE or "Comment"
-  local code = node.extra.diag_struct.code
-  if not code then
-    return {}
-  else
-    return {
-      text = "(" .. code .. ") ",
-      highlight = highlight,
-    }
-  end
-end
 
 M.diagnostic_count = function(config, node, state)
   local severity = config.severity
@@ -106,13 +123,13 @@ M.diagnostic_count = function(config, node, state)
   end
 
   local icon_padding = config.icon_padding or 1
-  local icon_text = icon.text and icon.text:gsub("%s+$", spaces(icon_padding)) or ""
+  local icon_text = icon.text and (icon.text .. spaces(icon_padding)) or ""
 
   local text = icon_text .. count
 
   local left_padding = config.left_padding or 1
   local right_padding = config.right_padding or 1
-  local text = spaces(left_padding) .. text .. spaces(right_padding)
+  text = spaces(left_padding) .. text .. spaces(right_padding)
 
   return {
     text = text,
@@ -141,20 +158,19 @@ M.icon = function(config, node, state)
   local diag = node.extra.diag_struct
   local severity = diag_severity_to_string(diag.severity)
 
-  return get_diag_icon(severity)
-end
+  local left_padding = config.left_padding or 0
+  local right_padding = config.right_padding or 2
+  local icon = get_diag_icon(severity)
+  icon.text = icon.text or ""
+  icon.text = spaces(left_padding) .. icon.text .. spaces(right_padding)
 
-M.position = function(config, node, state)
-  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
-  local diag = node.extra.diag_struct
-  local lnum, col = diag.lnum + 1, diag.col + 1
-  return {
-    text = "[" .. lnum .. ", " .. col .. "]",
-    highlight = highlight,
-  }
+  return icon
 end
 
 M.name = function(config, node, state)
+  if node.type == "diagnostic" then
+    return M.message(config, node, state)
+  end
   local highlight = config.highlight or highlights.FILE_NAME_OPENED
   local name = node.name
   if node.type == "directory" then
@@ -171,17 +187,132 @@ M.name = function(config, node, state)
   }
 end
 
+M.position = function(config, node, state)
+  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local diag = node.extra.diag_struct
+  local lnum, col = diag.lnum + 1, diag.col + 1
+  local left = config.left or "["
+  local middle = config.middle or ", "
+  local right = config.right or "]"
+
+  return create_component({
+    left, tostring(lnum), middle, tostring(col), right
+  }, highlight)
+end
+
+M.bufnr = function(config, node, state)
+  local highlight = config.highlight or highlights.BUFFER_NUMBER
+  local bufnr = node.extra.diag_struct.bufnr
+  if not bufnr then
+    return {}
+  end
+
+  local left = config.left or "#"
+  local right = config.right or {}
+
+  local min_width = config.min_width or 0
+  bufnr = string.format("%" .. min_width .. "d", bufnr)
+
+  return create_component({ left, bufnr, right }, highlight)
+end
+
+M.lnum = function(config, node, state)
+  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local lnum = tostring(node.extra.diag_struct.lnum + 1)
+  local left, right = config.left or {}, config.right or {}
+
+  local min_width = config.min_width or 0
+  lnum = string.format("%" .. min_width .. "d", lnum)
+
+  return create_component({ left, tostring(lnum), right }, highlight)
+end
+
+M.end_lnum = function(config, node, state)
+  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local end_lnum = node.extra.diag_struct.end_lnum
+  local left, right = config.left or {}, config.right or {}
+  if not end_lnum then
+    return {}
+  else
+    end_lnum = end_lnum + 1
+  end
+
+  local min_width = config.min_width or 0
+  end_lnum = string.format("%" .. min_width .. "d", end_lnum)
+
+  return create_component({ left, end_lnum, config }, highlight)
+end
+
+M.col = function(config, node, state)
+  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local col = tostring(node.extra.diag_struct.col + 1)
+  local left, right = config.left or {}, config.right or {}
+
+  local min_width = config.min_width or 0
+  col = string.format("%" .. min_width .. "d", col)
+
+  return create_component({ left, tostring(col), right }, highlight)
+end
+
+M.end_col = function(config, node, state)
+  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local end_col = node.extra.diag_struct.end_col
+  local left, right = config.left or {}, config.right or {}
+  if not end_col then
+    return {}
+  else
+    end_col = end_col + 1
+  end
+
+  local min_width = config.min_width or 0
+  end_col = string.format("%" .. min_width .. "d", end_col)
+
+  return create_component({ left, tostring(end_col), right }, highlight)
+end
+
+M.severity = function(config, node, state)
+  local highlight = config.highlight or highlights.MESSAGE
+  local severity = node.extra.diag_struct.severity
+  local left, right = config.left or {}, config.right or {}
+  if not severity then
+    return {}
+  end
+  
+  return create_component({ left, tostring(severity), right }, highlight)
+end
+
+M.message = function(config, node, state)
+  local highlight = config.highlight or highlights.FILE_NAME_OPENED
+  local message = node.extra.diag_struct.message
+  local left = config.left or {}
+  local right = config.right or " "
+
+  return create_component({ left, message, right }, highlight)
+end
+
 M.source = function(config, node, state)
   local highlight = config.highlight or highlights.DIAG_SOURCE or "Comment"
   local source = node.extra.diag_struct.source
+  local left = config.left or {}
+  local right = config.right or " "
   if not source then
     return {}
-  else
-    return {
-      text = source .. " ",
-      highlight = highlight,
-    }
   end
+
+  return create_component({ left, source, right }, highlight)
+end
+
+M.code = function(config, node, state)
+  local highlight = config.highlight or highlights.DIAG_CODE or "Comment"
+  local code = node.extra.diag_struct.code
+  local left = config.left or "("
+  local right = config.left or ") "
+
+  if not code then
+    return {}
+  end
+
+  return create_component({ left, code, right }, highlight)
 end
 
 return vim.tbl_deep_extend("force", common, M)
