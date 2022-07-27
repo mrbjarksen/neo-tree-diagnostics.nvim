@@ -67,7 +67,7 @@ local diag_severity_to_string = function(severity)
 end
 
 local get_diag_icon = function(severity)
-  if severity == nil then
+  if severity == nil or severity == "all" then
     return {}
   end
 
@@ -99,7 +99,7 @@ end
 local M = {}
 
 M.diagnostic_count = function(config, node, state)
-  local severity = config.severity
+  local severity = config.severity or "all"
   local icon = get_diag_icon(severity)
   local highlight = config.highlight or icon.highlight or diag_highlights.TOTAL_COUNT
 
@@ -113,8 +113,8 @@ M.diagnostic_count = function(config, node, state)
   end
 
   local count = 0
-  if severity == nil then
-    for _, sev in ipairs({ "Error", "Warn", "Info", "Hint", "Other" }) do
+  if severity == "all" then
+    for _, sev in ipairs({ "Error", "Warn", "Info", "Hint" }) do
       count = count + (diag_counts[sev] or 0)
     end
   else
@@ -137,6 +137,35 @@ M.diagnostic_count = function(config, node, state)
     text = text,
     highlight = highlight,
   }
+end
+
+M.split_diagnostic_counts = function(config, node, state)
+  local conf = vim.deepcopy(config)
+
+  local severities = conf.severities or { "Error", "Warn", "Info", "Hint" }
+  local left_padding = conf.left_padding or 0
+  local right_padding = conf.right_padding or 0
+  local between = conf.between or " "
+
+  conf.left_padding = 0
+  conf.right_padding = 0
+
+  local components = { spaces(left_padding) }
+  for _, sev in ipairs(severities) do
+    conf.severity = sev
+    local component = M.diagnostic_count(conf, node, state)
+    if component.text and component.text ~= "" then
+      components[#components+1] = component
+      components[#components+1] = between
+    end
+  end
+  components[#components] = spaces(right_padding)
+
+  if #components == 1 then
+    return {}
+  end
+
+  return create_component(components, config.highlight or highlights.DIM_TEXT)
 end
 
 M.grouped_path = function(config, node, state)

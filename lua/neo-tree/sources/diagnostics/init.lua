@@ -179,10 +179,7 @@ M.default_config = {
       { "grouped_path" },
       { "name" },
       { "diagnostic_count", show_when_none = true },
-      { "diagnostic_count", severity = "Error", right_padding = 0 },
-      { "diagnostic_count", severity = "Warn", right_padding = 0 },
-      { "diagnostic_count", severity = "Info", right_padding = 0 },
-      { "diagnostic_count", severity = "Hint", right_padding = 0 },
+      { "split_diagnostic_counts", left_padding = 1 },
       { "clipboard" },
     },
     diagnostic = {
