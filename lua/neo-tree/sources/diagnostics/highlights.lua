@@ -18,7 +18,7 @@ M.setup = function()
   create_highlight_group(M.GROUPED_PATH, { highlights.DIRECTORY_NAME, "Directory" })
   create_highlight_group(M.POSITION, { "LineNr" })
   create_highlight_group(M.SEVERITY_NUMBER, { "SpecialChar" })
-  create_highlight_group(M.MESSAGE, { highlights.NORMAL, "Normal" })
+  create_highlight_group(M.MESSAGE, {}, "NONE", "NONE")
   create_highlight_group(M.SOURCE, { highlights.MESSAGE, "Comment" })
   create_highlight_group(M.CODE, { highlights.MESSAGE, "Comment" })
 end
