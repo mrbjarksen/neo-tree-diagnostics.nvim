@@ -7,6 +7,7 @@ local renderer = require("neo-tree.ui.renderer")
 local manager = require("neo-tree.sources.manager")
 local events = require("neo-tree.events")
 local items = require("neo-tree.sources.diagnostics.lib.items")
+local diag_highlights = require("neo-tree.sources.diagnostics.highlights")
 
 local M = { name = "diagnostics" }
 
@@ -119,6 +120,13 @@ end
 ---@param config table Configuration table containing any keys that the user
 --wants to change from the defaults. May be empty to accept default values.
 M.setup = function(config, global_config)
+  diag_highlights.setup()
+  events.subscribe({
+    event = events.VIM_COLORSCHEME,
+    handler = diag_highlights.setup,
+    id = "neo-tree-diagnostics-highlights",
+  })
+
   if config.before_render then
     manager.subscribe(M.name, {
       event = events.BEFORE_RENDER,

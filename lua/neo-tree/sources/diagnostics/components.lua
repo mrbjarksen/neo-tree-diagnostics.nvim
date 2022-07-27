@@ -11,8 +11,10 @@
 --    highlight: The highlight group to apply to this text.
 
 local highlights = require("neo-tree.ui.highlights")
+local diag_highlights = require("neo-tree.sources.diagnostics.highlights")
 local common = require("neo-tree.sources.common.components")
 local utils = require("neo-tree.utils")
+local vim = vim
 
 local spaces = function(n)
   return string.rep(" ", n)
@@ -99,7 +101,7 @@ local M = {}
 M.diagnostic_count = function(config, node, state)
   local severity = config.severity
   local icon = get_diag_icon(severity)
-  local highlight = config.highlight or icon.highlight or highlights.DIAG_COUNT or "TabLineSel"
+  local highlight = config.highlight or icon.highlight or diag_highlights.TOTAL_COUNT
 
   if node.path == nil then
     return {}
@@ -138,7 +140,7 @@ M.diagnostic_count = function(config, node, state)
 end
 
 M.grouped_path = function(config, node, state)
-  local highlight = config.highlight or highlights.DIRECTORY_NAME
+  local highlight = config.highlight or diag_highlights.GROUPED_PATH
   local grouped_path = node.extra and node.extra.grouped_path
   if grouped_path == nil then
     return {}
@@ -188,7 +190,7 @@ M.name = function(config, node, state)
 end
 
 M.position = function(config, node, state)
-  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local highlight = config.highlight or diag_highlights.POSITION
   local diag = node.extra.diag_struct
   local lnum, col = diag.lnum + 1, diag.col + 1
   local left = config.left or "["
@@ -217,7 +219,7 @@ M.bufnr = function(config, node, state)
 end
 
 M.lnum = function(config, node, state)
-  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local highlight = config.highlight or diag_highlights.POSITION
   local lnum = tostring(node.extra.diag_struct.lnum + 1)
   local left, right = config.left or "", config.right or ""
 
@@ -228,7 +230,7 @@ M.lnum = function(config, node, state)
 end
 
 M.end_lnum = function(config, node, state)
-  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local highlight = config.highlight or diag_highlights.POSITION
   local end_lnum = node.extra.diag_struct.end_lnum
   local left, right = config.left or {}, config.right or {}
   if not end_lnum then
@@ -244,7 +246,7 @@ M.end_lnum = function(config, node, state)
 end
 
 M.col = function(config, node, state)
-  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local highlight = config.highlight or diag_highlights.POSITION 
   local col = tostring(node.extra.diag_struct.col + 1)
   local left, right = config.left or "", config.right or ""
 
@@ -255,7 +257,7 @@ M.col = function(config, node, state)
 end
 
 M.end_col = function(config, node, state)
-  local highlight = config.highlight or highlights.DIAG_POSITION or "LineNr"
+  local highlight = config.highlight or diag_highlights.POSITION
   local end_col = node.extra.diag_struct.end_col
   local left, right = config.left or "", config.right or ""
   if not end_col then
@@ -271,7 +273,7 @@ M.end_col = function(config, node, state)
 end
 
 M.severity = function(config, node, state)
-  local highlight = config.highlight or highlights.MESSAGE
+  local highlight = config.highlight or diag_highlights.SEVERITY_NUMBER
   local severity = node.extra.diag_struct.severity
   local left, right = config.left or "", config.right or ""
   if not severity then
@@ -282,7 +284,7 @@ M.severity = function(config, node, state)
 end
 
 M.message = function(config, node, state)
-  local highlight = config.highlight or highlights.NORMAL
+  local highlight = config.highlight or diag_highlights.MESSAGE
   local message = node.extra.diag_struct.message
   local left = config.left or ""
   local right = config.right or " "
@@ -291,7 +293,7 @@ M.message = function(config, node, state)
 end
 
 M.source = function(config, node, state)
-  local highlight = config.highlight or highlights.DIAG_SOURCE or "Comment"
+  local highlight = config.highlight or diag_highlights.SOURCE
   local source = node.extra.diag_struct.source
   local left = config.left or ""
   local right = config.right or " "
@@ -303,7 +305,7 @@ M.source = function(config, node, state)
 end
 
 M.code = function(config, node, state)
-  local highlight = config.highlight or highlights.DIAG_CODE or "Comment"
+  local highlight = config.highlight or diag_highlights.CODE
   local code = node.extra.diag_struct.code
   local left = config.left or "("
   local right = config.right or ") "
