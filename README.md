@@ -3,6 +3,8 @@
 An extension for [neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim)
 implementing a source for viewing workspace diagnostics.
 
+![neo-tree-diagnostics](https://user-images.githubusercontent.com/62466569/181661222-8548e37d-d5d2-4f44-938f-39789ff9d4dc.png)
+
 ## Installation
 
 Installing this plugin should be possible using your package manager of choice,
@@ -35,6 +37,7 @@ require("neo-tree").setup({
     bind_to_cwd = true,
     diag_sort_function = "severity", -- "severity" means diagnostic items are sorted by severity in addition to their positions.
                                      -- "position" means diagnostic items are sorted strictly by their positions.
+                                     -- May also be a function.
     follow_behavior = { -- Behavior when `follow_current_file` is true
       always_focus_file = false, -- Focus the followed file, even when focus is currently on a diagnostic item belonging to that file.
       expand_followed = true, -- Ensure the node of the followed file is expanded
