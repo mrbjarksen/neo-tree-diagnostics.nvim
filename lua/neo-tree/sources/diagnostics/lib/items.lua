@@ -97,6 +97,7 @@ M.get_diagnostics = function(state)
   root.search_pattern = state.search_pattern
   context.folders[root.path] = root
 
+  local encountered = {}
   local diag_items_by_buffer = {}
   for _, diag in ipairs(vim.diagnostic.get()) do
     local bufnr = diag.bufnr
@@ -105,7 +106,10 @@ M.get_diagnostics = function(state)
       if diag_items_by_buffer[bufnr] == nil then
         diag_items_by_buffer[bufnr] = {}
       end
-      table.insert(diag_items_by_buffer[bufnr], diag_item)
+      if not encountered[diag_item.id] then
+        table.insert(diag_items_by_buffer[bufnr], diag_item)
+      end
+      encountered[diag_item.id] = true
     end
   end
 
