@@ -7,7 +7,7 @@ local log = require("neo-tree.log")
 local M = {}
 
 local diag_struct_to_item = function(diag)
-  local path = vim.api.nvim_buf_get_name(diag.bufnr or 0)
+  local path = vim.api.nvim_buf_get_name(diag.bufnr)
   local lines = tostring(diag.lnum + 1)
   if diag.end_lnum ~= nil then
     lines = lines .. "-" .. (diag.end_lnum + 1)
@@ -16,13 +16,22 @@ local diag_struct_to_item = function(diag)
   if diag.end_col ~= nil then
     cols = cols .. "-" .. (diag.end_col + 1)
   end
-  return {
+  local item = {
     id = path .. ":" .. lines .. ":" .. cols .. ":" .. diag.message,
     name = diag.message,
     path = path,
     type = "diagnostic",
-    extra = { diag_struct = diag },
+    extra = {
+      diag_struct = diag,
+      bufnr = diag.bufnr,
+      position = { diag.lnum, diag.col },
+    },
   }
+  local end_position = { diag.end_lnum, diag.end_col }
+  if #end_position ~= 0 then
+    item.extra.end_position = end_position
+  end
+  return item
 end
 
 local group_dirs_and_files
@@ -60,7 +69,7 @@ local compare_position = function(line_a, col_a, line_b, col_b)
   end
   if line_a == line_b then
     if col_a == col_b then
-      return nil 
+      return nil
     else
       return col_a < col_b
     end
