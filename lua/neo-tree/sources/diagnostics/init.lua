@@ -130,7 +130,12 @@ M.navigate = function(state, path, path_to_reveal)
     path_changed = true
   end
   if path_to_reveal then
-    renderer.position.set(state, path_to_reveal)
+    local node_ok, node = pcall(function()
+      return state.tree:get_node()
+    end)
+    if not node_ok or node:get_parent_id() ~= path_to_reveal then
+      renderer.position.set(state, path_to_reveal)
+    end
   end
 
   items.get_diagnostics(state)
