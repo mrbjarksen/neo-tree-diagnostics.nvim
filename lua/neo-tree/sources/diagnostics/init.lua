@@ -94,24 +94,26 @@ M.diagnostics_changed = function()
   )
 end
 
+local enable_preview = function(state, preview_config)
+  local preview = require("neo-tree.sources.common.preview")
+
+  if not preview.is_active() then
+    state.config = preview_config
+    state.commands.toggle_preview(state)
+  end
+end
+
 M.autopreview = function(preview_config)
   local state = get_state()
-  if state.preview and state.preview.active then
-    return
-  end
 
-  if state.tree == nil then
+  if state.tree == nil or #vim.fn.win_findbuf(state.tree.bufnr) == 0 then
     manager.subscribe(M.name, {
       event = events.AFTER_RENDER,
-      handler = function()
-        state.config = preview_config
-        state.commands.toggle_preview(state)
-      end,
+      handler = utils.wrap(enable_preview, state, preview_config),
       once = true,
     })
   else
-    state.config = preview_config
-    state.commands.toggle_preview(state)
+    enable_preview(state, preview_config)
   end
 end
 
