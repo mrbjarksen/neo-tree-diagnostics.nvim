@@ -34,6 +34,9 @@ require("neo-tree").setup({
   },
   -- These are the defaults
   diagnostics = {
+    autopreview = false, -- Whether to automatically enable preview mode
+    autopreview_config = {}, -- Config table to pass to autopreview (for example `{ use_float = true }`)
+    autopreview_event = "neo_tree_buffer_enter", -- The event to enable autopreview upon (for example `"neo_tree_window_after_open"`)
     bind_to_cwd = true,
     diag_sort_function = "severity", -- "severity" means diagnostic items are sorted by severity in addition to their positions.
                                      -- "position" means diagnostic items are sorted strictly by their positions.
