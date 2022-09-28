@@ -94,6 +94,27 @@ M.diagnostics_changed = function()
   )
 end
 
+M.autopreview = function(preview_config)
+  local state = get_state()
+  if state.preview and state.preview.active then
+    return
+  end
+
+  if state.tree == nil then
+    manager.subscribe(M.name, {
+      event = events.AFTER_RENDER,
+      handler = function()
+        state.config = preview_config
+        state.commands.toggle_preview(state)
+      end,
+      once = true,
+    })
+  else
+    state.config = preview_config
+    state.commands.toggle_preview(state)
+  end
+end
+
 ---Navigate to the given path.
 ---@param path string Path to navigate to. If empty, will navigate to the cwd.
 M.navigate = function(state, path, path_to_reveal)
@@ -156,6 +177,13 @@ M.setup = function(config, global_config)
     manager.subscribe(M.name, {
       event = events.VIM_BUFFER_ENTER,
       handler = M.follow,
+    })
+  end
+
+  if config.autopreview then
+    manager.subscribe(M.name, {
+      event = config.autopreview_event,
+      handler = utils.wrap(M.autopreview, config.autopreview_config),
     })
   end
 end
