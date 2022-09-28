@@ -66,7 +66,7 @@ local diag_severity_to_string = function(severity)
   end
 end
 
-local get_diag_icon = function(severity)
+local get_diag_icon = function(config, severity)
   if severity == nil or severity == "all" then
     return {}
   end
@@ -90,9 +90,14 @@ local get_diag_icon = function(severity)
     highlight = "DiagnosticSign" .. severity,
   }
 
+  local override = {
+    text = config.symbols and config.symbols[severity:lower()],
+    highlight = config.highlights and config.highlights[severity:lower()],
+  }
+
   return {
-    text = defined.text or fallback.text,
-    highlight = defined.texthl or fallback.highlight,
+    text = override.text or defined.text or fallback.text,
+    highlight = override.highlight or defined.texthl or fallback.highlight,
   }
 end
 
@@ -100,7 +105,7 @@ local M = {}
 
 M.diagnostic_count = function(config, node, state)
   local severity = config.severity or "all"
-  local icon = get_diag_icon(severity)
+  local icon = get_diag_icon(config, severity)
   local highlight = config.highlight or icon.highlight or diag_highlights.TOTAL_COUNT
 
   if node.path == nil then
@@ -191,7 +196,7 @@ M.icon = function(config, node, state)
 
   local left_padding = config.left_padding or 0
   local right_padding = config.right_padding or 2
-  local icon = get_diag_icon(severity)
+  local icon = get_diag_icon(config, severity)
   icon.text = icon.text or ""
   icon.text = spaces(left_padding) .. icon.text .. spaces(right_padding)
 
