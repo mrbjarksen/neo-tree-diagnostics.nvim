@@ -108,8 +108,11 @@ M.autopreview = function(preview_config)
 
   if state.tree == nil or #vim.fn.win_findbuf(state.tree.bufnr) == 0 then
     manager.subscribe(M.name, {
+      id = "neo-tree-diagnostics-autopreview-handler",
       event = events.AFTER_RENDER,
-      handler = utils.wrap(enable_preview, state, preview_config),
+      handler = function(new_state)
+        enable_preview(new_state, preview_config)
+      end,
       once = true,
     })
   else
