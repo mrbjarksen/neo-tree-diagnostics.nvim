@@ -48,7 +48,7 @@ local follow_internal = function()
     local follow_behavior = state.follow_behavior or {}
     if follow_behavior.collapse_others then
       renderer.collapse_all_nodes(tree)
-      renderer.expand_to_node(tree, follow_node)
+      renderer.expand_to_node(state, follow_node)
       if was_expanded then
         follow_node:expand()
       end
