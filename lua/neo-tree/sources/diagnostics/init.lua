@@ -111,9 +111,11 @@ M.autopreview = function(preview_config)
       id = "neo-tree-diagnostics-autopreview-handler",
       event = events.AFTER_RENDER,
       handler = function(new_state)
-        enable_preview(new_state, preview_config)
+        if new_state.name == state.name then
+          enable_preview(new_state, preview_config)
+          return true
+        end
       end,
-      once = true,
     })
   else
     enable_preview(state, preview_config)
