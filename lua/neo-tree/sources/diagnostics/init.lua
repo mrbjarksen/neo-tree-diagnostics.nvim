@@ -9,6 +9,7 @@ local events = require("neo-tree.events")
 local items = require("neo-tree.sources.diagnostics.lib.items")
 local diag_highlights = require("neo-tree.sources.diagnostics.highlights")
 local defaults = require("neo-tree.sources.diagnostics.defaults")
+local log = require("neo-tree.log")
 
 local M = { name = "diagnostics" }
 
@@ -103,12 +104,12 @@ local enable_preview = function(state, preview_config)
   end
 end
 
-M.autopreview = function(preview_config)
+M.auto_preview = function(preview_config)
   local state = get_state()
 
   if state.tree == nil or #vim.fn.win_findbuf(state.tree.bufnr) == 0 then
     manager.subscribe(M.name, {
-      id = "neo-tree-diagnostics-autopreview-handler",
+      id = "neo-tree-diagnostics-auto-preview-handler",
       event = events.AFTER_RENDER,
       handler = function(new_state)
         if new_state.name == state.name then
@@ -193,9 +194,20 @@ M.setup = function(config, global_config)
   end
 
   if config.autopreview then
+    log.warn("(diagnostics) The `autopreview` config items are deprecated, please switch to `auto_preview` (see README.md)")
     manager.subscribe(M.name, {
       event = config.autopreview_event,
-      handler = utils.wrap(M.autopreview, config.autopreview_config),
+      handler = utils.wrap(M.auto_preview, config.autopreview_config),
+    })
+  elseif config.auto_preview == true then
+    manager.subscribe(M.name, {
+      event = M.default_config.auto_preview.event,
+      handler = utils.wrap(M.auto_preview, M.default_config.auto_preview.preview_config),
+    })
+  elseif config.auto_preview.enabled then
+    manager.subscribe(M.name, {
+      event = config.auto_preview.event,
+      handler = utils.wrap(M.auto_preview, config.auto_preview.preview_config),
     })
   end
 end
