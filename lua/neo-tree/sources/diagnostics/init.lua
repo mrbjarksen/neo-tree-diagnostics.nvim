@@ -74,7 +74,7 @@ M.follow = function()
   end, 100, utils.debounce_strategy.CALL_LAST_ONLY)
 end
 
-local diagnostics_changed_internal = function()
+local diagnostic_update_internal = function()
   for _, tabnr in ipairs(vim.api.nvim_list_tabpages()) do
     local state = manager.get_state(M.name, tabnr)
     if state.path and renderer.window_exists(state) then
@@ -86,11 +86,11 @@ local diagnostics_changed_internal = function()
   end
 end
 
-M.diagnostics_changed = function()
+M.diagnostic_update = function(delay)
   utils.debounce(
-    "diagonostics_changed",
-    diagnostics_changed_internal,
-    100,
+    "diagnostic_update",
+    diagnostic_update_internal,
+    delay,
     utils.debounce_strategy.CALL_LAST_ONLY
   )
 end
@@ -174,10 +174,12 @@ M.setup = function(config, global_config)
     })
   end
 
-  manager.subscribe(M.name, {
-    event = events.VIM_DIAGNOSTIC_CHANGED,
-    handler = M.diagnostics_changed,
-  })
+  if config.refresh.event and config.refresh.event ~= "none" then
+    manager.subscribe(M.name, {
+      event = config.refresh.event,
+      handler = utils.wrap(M.diagnostic_update, config.refresh.delay),
+    })
+  end
 
   if config.bind_to_cwd then
     manager.subscribe(M.name, {
