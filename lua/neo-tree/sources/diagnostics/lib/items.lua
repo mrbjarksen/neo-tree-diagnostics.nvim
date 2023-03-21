@@ -108,7 +108,13 @@ M.get_diagnostics = function(state)
 
   local encountered = {}
   local diag_items_by_buffer = {}
-  for _, diag in ipairs(vim.diagnostic.get()) do
+
+  local diagnostics = vim.diagnostic.get()
+  for i, diag in ipairs(diagnostics) do
+    if state.refresh.max_items and i > state.refresh.max_items then
+      log.debug("Maximum number of diagnostic items exceeded")
+      break
+    end
     local bufnr = diag.bufnr
     if bufnr ~= nil then
       local diag_item = diag_struct_to_item(diag)
@@ -170,6 +176,22 @@ M.get_diagnostics = function(state)
   end
 
   file_items.deep_sort(root.children)
+
+  if state.refresh.max_items then
+    local items_left = #diagnostics - state.refresh.max_items
+    if items_left > 0 then
+      local message = {
+        id = "max_items_exceeded_message",
+        name = "(there are " .. items_left .. " unprocessed diagnostics)",
+        type = "message",
+      }
+      if items_left == 1 then
+        message.name = "(there is 1 unprocessed diagnostic)"
+      end
+      table.insert(root.children, 1, message)
+    end
+  end
+
   renderer.show_nodes(root_nodes, state)
   state.loading = false
 end
