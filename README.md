@@ -53,9 +53,11 @@ require("neo-tree").setup({
     group_empty_dirs = true, -- when true, empty directories will be grouped together
     show_unloaded = true, -- show diagnostics from unloaded buffers
     refresh = {
-        delay = 100, -- Time (in ms) to wait before updating diagnostics. Might resolve some issues with Neovim hanging.
-        event = "vim_diagnostic_changed", -- Event to use for updating diagnostics (for example `"neo_tree_buffer_enter"`)
+      delay = 100, -- Time (in ms) to wait before updating diagnostics. Might resolve some issues with Neovim hanging.
+      event = "vim_diagnostic_changed", -- Event to use for updating diagnostics (for example `"neo_tree_buffer_enter"`)
                                         -- Set to `false` or `"none"` to disable automatic refreshing
+      max_items = false, -- The maximum number of diagnostic items to attempt processing
+                         -- Set to `false` for no maximum
     },
   },
 })
