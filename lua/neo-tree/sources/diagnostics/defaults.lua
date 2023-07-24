@@ -1,7 +1,4 @@
 local config = {
-  autopreview = false, -- DEPRECATED
-  autopreview_config = {}, -- DEPRECATED
-  autopreview_event = "neo_tree_buffer_enter", -- DEPRECATED
   auto_preview = { -- May also be set to `true`
     enabled = false, -- Whether to automatically enable preview mode
     preview_config = {}, -- Config table to pass to auto preview (for example `{ use_float = true }`)

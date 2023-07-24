@@ -195,13 +195,7 @@ M.setup = function(config, global_config)
     })
   end
 
-  if config.autopreview then
-    log.warn("(diagnostics) The `autopreview` config items are deprecated, please switch to `auto_preview` (see README.md)")
-    manager.subscribe(M.name, {
-      event = config.autopreview_event,
-      handler = utils.wrap(M.auto_preview, config.autopreview_config),
-    })
-  elseif config.auto_preview == true then
+  if config.auto_preview == true then
     manager.subscribe(M.name, {
       event = M.default_config.auto_preview.event,
       handler = utils.wrap(M.auto_preview, M.default_config.auto_preview.preview_config),
