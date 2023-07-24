@@ -176,12 +176,17 @@ end
 M.grouped_path = function(config, node, state)
   local highlight = config.highlight or diag_highlights.GROUPED_PATH
   local grouped_path = node.extra and node.extra.grouped_path
+  local no_next_padding = config.no_next_padding
+  if no_next_padding == nil then
+    no_next_padding = true
+  end
   if grouped_path == nil then
     return {}
   else
     return {
       text = grouped_path,
       highlight = highlight,
+      no_next_padding = no_next_padding,
     }
   end
 end
