@@ -195,12 +195,13 @@ M.setup = function(config, global_config)
     })
   end
 
-  if config.auto_preview == true then
-    manager.subscribe(M.name, {
-      event = M.default_config.auto_preview.event,
-      handler = utils.wrap(M.auto_preview, M.default_config.auto_preview.preview_config),
-    })
-  elseif config.auto_preview.enabled then
+  if type(config.auto_preview) ~= "table" then
+    config.auto_preview = vim.tbl_extend("keep", {
+      enabled = config.auto_preview
+    }, M.default_config.auto_preview)
+  end
+
+  if config.auto_preview.enabled then
     manager.subscribe(M.name, {
       event = config.auto_preview.event,
       handler = utils.wrap(M.auto_preview, config.auto_preview.preview_config),

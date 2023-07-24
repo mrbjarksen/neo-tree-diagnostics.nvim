@@ -1,5 +1,5 @@
 local config = {
-  auto_preview = { -- May also be set to `true`
+  auto_preview = { -- May also be set to `true` or `false`
     enabled = false, -- Whether to automatically enable preview mode
     preview_config = {}, -- Config table to pass to auto preview (for example `{ use_float = true }`)
     event = "neo_tree_buffer_enter", -- The event to enable auto preview upon (for example `"neo_tree_window_after_open"`)
