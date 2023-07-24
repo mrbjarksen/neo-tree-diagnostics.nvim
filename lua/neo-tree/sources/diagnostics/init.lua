@@ -21,9 +21,25 @@ local get_state = function()
   return manager.get_state(M.name)
 end
 
+-- Adapted from renderer.collapse_all_nodes
+local collapse_nodes_with_cond = function(tree, cond, root_node_id)
+  local expanded = renderer.get_expanded_nodes(tree, root_node_id)
+  for _, id in ipairs(expanded) do
+    local node = tree:get_node(id)
+    if utils.is_expandable(node) and cond(node) then
+      node:collapse(id)
+    end
+  end
+  -- but make sure the root is expanded
+  local root = tree:get_nodes()[1]
+  if root then
+    root:expand()
+  end
+end
+
 local follow_internal = function()
   if vim.bo.filetype == "neo-tree" or vim.bo.filetype == "neo-tree-popup" then
-    return
+    return false
   end
   local path_to_reveal = manager.get_path_to_reveal()
 
@@ -46,20 +62,24 @@ local follow_internal = function()
       return false
     end
     local was_expanded = follow_node:is_expanded()
-    local follow_behavior = state.follow_behavior or {}
-    if follow_behavior.collapse_others then
-      renderer.collapse_all_nodes(tree)
+    local follow_config = state.follow_current_file
+    if not follow_config.leave_dirs_open or not follow_config.leave_files_open then
+      collapse_nodes_with_cond(tree, function(node)
+        local should_collapse_dir = node.type == "directory" and not follow_config.leave_dirs_open
+        local should_collapse_file = node.type == "file" and not follow_config.leave_files_open
+        return should_collapse_dir or should_collapse_file
+      end)
       renderer.expand_to_node(state, follow_node)
       if was_expanded then
         follow_node:expand()
       end
     end
-    if follow_behavior.expand_followed then
+    if follow_config.expand_followed then
       if not follow_node:is_expanded() then
         follow_node:expand()
       end
     end
-    if follow_behavior.always_focus_file or cur_node.path ~= path_to_reveal then
+    if follow_config.always_focus_file or cur_node.path ~= path_to_reveal then
       renderer.focus_node(state, path_to_reveal, true)
     else
       renderer.focus_node(state, cur_node.id, true)
@@ -188,7 +208,37 @@ M.setup = function(config, global_config)
     })
   end
 
-  if config.follow_current_file then
+  if type(config.follow_current_file) ~= "table" then
+    config.follow_current_file = vim.tbl_extend("keep", {
+      enabled = config.follow_current_file
+    }, M.default_config.follow_current_file)
+  end
+
+  if config.follow_behavior then
+    log.warn([[
+      (diagnostics)
+      `follow_behavior` has been deprecated
+      in favor of `follow_current_file` (see README)]])
+
+    config.follow_current_file = vim.tbl_extend("force", config.follow_current_file, config.follow_behavior)
+
+    if config.follow_behavior.collapse_others ~= nil then
+      log.warn([[
+        (diagnostics)
+        `follow_behavior.collapse_others` has been deprecated
+        in favor of `follow_current_file.leave_dirs_open`
+        and `follow_current_file.leave_files_open (see README)]])
+
+      config.follow_current_file.leave_dirs_open = not config.follow_behavior.collapse_others
+      config.follow_current_file.leave_files_open = not config.follow_behavior.collapse_others
+
+      config.follow_current_file.collapse_others = nil
+    end
+
+    config.follow_behavior = nil
+  end
+
+  if config.follow_current_file.enabled then
     manager.subscribe(M.name, {
       event = events.VIM_BUFFER_ENTER,
       handler = M.follow,
