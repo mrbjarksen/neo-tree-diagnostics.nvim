@@ -26,6 +26,11 @@ local config = {
                        -- Set to `false` for no maximum
   },
   renderers = {
+    directory = {
+      { "indent" },
+      { "icon" },
+      { "name" },
+    },
     file = {
       { "indent" },
       { "icon" },
