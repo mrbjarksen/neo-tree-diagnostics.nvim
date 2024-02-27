@@ -11,7 +11,10 @@ local diag_highlights = require("neo-tree.sources.diagnostics.highlights")
 local defaults = require("neo-tree.sources.diagnostics.defaults")
 local log = require("neo-tree.log")
 
-local M = { name = "diagnostics" }
+local M = {
+    name = "diagnostics",
+    display_name = " Diagnostics",
+}
 
 local wrap = function(func)
   return utils.wrap(func, M.name)
